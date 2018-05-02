@@ -14,7 +14,7 @@ def ajustar(solucao,tabela):
     return solucao
 
 
-def hillClimbing(tabela):
+def hillClimbing(max_alt,nTests,tabela):
     # np.shape(v) retorna um vetor que corresponde à dimensão da matriz v
 
     nLetras = len(tabela)
@@ -23,52 +23,63 @@ def hillClimbing(tabela):
     valores = np.random.randint(10, size = nLetras)
     soma = qualidade(valores, tabela)
     n_interacoes = 0
-    for i in range(3000):
-        # Choose cities to swap
-        pos = np.random.randint(nLetras)
-        pos2 = np.random.randint(nLetras)
-        possibleValues = valores.copy()
-        possibleValues[pos] = np.random.randint(10)
-        possibleValues[pos2] = np.random.randint(10)
-        possibleValues = ajustar(possibleValues,tabela)
-        novaSoma = qualidade(possibleValues,tabela)
+    alt = int(max_alt*nLetras)
+    for i in range(nTests):
+        if soma != 0:
+            # Choose cities to swap
+            possibleValues = valores.copy()
+            pos = 0
+            for j in range(alt):
+                pos = np.random.randint(nLetras)
+                possibleValues[pos] = np.random.randint(10)
+            possibleValues = ajustar(possibleValues,tabela)
+            novaSoma = qualidade(possibleValues,tabela)
 
-        if novaSoma < soma:
-            soma = novaSoma
-            valores = possibleValues
-        n_interacoes += 1
+            if novaSoma < soma:
+                soma = novaSoma
+                valores = possibleValues
+            n_interacoes += 1
+        else:
+            break
+
     return valores, soma, n_interacoes
 
 
-def simulatedAnnealing(nLetras):
+def simulatedAnnealing(max_alt,nTests,tabela):
+    nLetras = len(tabela)
 
+    # np.arange(n) retorna um vetor com de tamanho n com a sequência de 0 a n-1
     valores = np.random.randint(10, size=nLetras)
-    soma = quality(valores)
+    soma = qualidade(valores, tabela)
 
-    T = 1000
+    T = nTests
     c = 0.8
-    nTests = 5000
+
 
     # while T>1:
     n_interacoes = 0
+    alt = int(max_alt * nLetras)
     for i in range(nTests):
-        # Choose cities to swap
-        pos = np.random.randint(nLetras)
-        pos2 = np.random.randint(nLetras)
-        possibleValues = valores.copy()
-        possibleValues[pos] = np.random.randint(10)
-        possibleValues[pos2] = np.random.randint(10)
-        possibleValues = ajustar(possibleValues)
-        novaSoma = quality(possibleValues)
+        if soma != 0:
+            # Choose cities to swap
+            possibleValues = valores.copy()
+            pos = 0
+            for j in range(alt):
+                pos = np.random.randint(nLetras)
+                possibleValues[pos] = np.random.randint(10)
+            possibleValues = ajustar(possibleValues,tabela)
+            novaSoma = qualidade(possibleValues,tabela)
 
-        if (novaSoma < soma) or (
-            (soma - novaSoma) > T * np.log(np.random.rand())):
-            soma = novaSoma
-            valores = possibleValues
+            if (novaSoma < soma) or (
+                (soma - novaSoma) > T * np.log(np.random.rand())):
+                soma = novaSoma
+                valores = possibleValues
 
-        # Annealing schedule
-        T = c * T
-        n_interacoes += 1
+            # Annealing schedule
+            T = c * T
+            n_interacoes += 1
+        else:
+            break
     return valores, soma, n_interacoes
 
 def imprimeResultado(vetor,tabela):
@@ -90,27 +101,37 @@ def vetores():
         res[i] = input("Termo " + str(i) + ": ")
     res[n] = input("Digite o termo correspondente ao resultado:")
     return res
-def runHill():
-    print("\nHill Climbing")
-    tabela = criaTabelaRes(["SEND", "MORE", "MONEY"])
+def runHill(max_alt, nTests,termos):
+    #print("\nHill Climbing")
+    tabela = criaTabelaRes(termos)
     start = time.time()
-    result = hillClimbing(tabela)
+    result = hillClimbing(max_alt, nTests,tabela)
     finish = time.time()
-    imprimeResultado(result[0],tabela)
-    print(" Número de Interações: ", result[2])
-    print(" Resultado:", result[1])
-    print("Tempo:", finish-start)
+    #imprimeResultado(result[0],tabela)
+    #print(" Número de Interações: ", result[2])
+    #print(" Resultado:", result[1])
+    #print("Tempo:", finish-start)
+    if result[1] != 0:
+        return 0, result[2]
+    else:
+        return 1, result[2]
 
 
-def runSimAnnealing(nLetras):
-    print("\nSimulated Annealing")
+def runSimAnnealing(max_alt, nTests,termos):
+    #print("\nSimulated Annealing")
+    tabela = criaTabelaRes(termos)
     start = time.time()
-    result = simulatedAnnealing(nLetras)
+    result = simulatedAnnealing(max_alt, nTests,tabela)
     finish = time.time()
-    imprimeResultado(result[0])
-    print(" Resultado:", result[1])
-    print(" Número de Interações: ", result[2])
-    print("Tempo:", finish - start)
+    #imprimeResultado(result[0],tabela)
+    #print(" Resultado:", result[1])
+    #print(" Número de Interações: ", result[2])
+    #print("Tempo:", finish - start)
+
+    if result[1] != 0:
+        return 0, result[2]
+    else:
+        return 1, result[2]
 
 
 def mapeamento(x):
@@ -168,8 +189,54 @@ def qualidade(vetor, tabela):
         res += vetor[v] * tabela[v][1]
     return abs(res)
 
-#print(qualidade(["ABC", "BBA", "ACB"], [2, 2, 3]))
-tabela = criaTabelaRes(["SEND","MORE", "MONEY"])
-res = qualidade([4, 3, 1, 3, 0, 0, 9, 7],tabela)
-print(res)
-runHill()
+
+def experimento(n_execucoes,n_iteracoes,por_tw,termos):
+    res_hill = 0
+    acertos_hill = 0
+    acertos_sa = 0
+    res_sa = 0
+    for i in range(n_execucoes):
+        hill = runHill(por_tw,n_iteracoes,termos)
+        sim = runSimAnnealing(por_tw,n_iteracoes,termos)
+        res_hill += hill[1]
+        res_sa += sim[1]
+        acertos_hill += hill[0]
+        acertos_sa += sim[0]
+    res_hill /= n_execucoes
+    res_sa /= n_execucoes
+    por_hill = (acertos_hill /n_execucoes)*100
+    por_sa = (acertos_sa / n_execucoes) * 100
+    print("Dados: ")
+    print("Número de execuções: ", n_execucoes)
+    print("Número de iterações: ", n_iteracoes)
+    print("Porcentagem de modificação do tweak:", por_tw*100, "%")
+    print("Termos: ", termos)
+    print("\n                  Resultado")
+    print("-----------------------------------------------")
+    print("                    |Iterações      | Acertos(em %)|")
+    print("-----------------------------------------------")
+    print("Hill Climbing       | {}       |    {}     |".format(res_hill,por_hill))
+    print("-----------------------------------------------")
+    print("Simulated Annealing | {}       |    {}     |".format(res_sa, por_sa))
+    print("-----------------------------------------------")
+    print("Média               | {0:.2f}       |    {1:.1f}     |".format((res_hill+res_sa)/2,(por_hill+por_sa)/2))
+    print("-----------------------------------------------")
+
+experimento(3000,3000,0.4,["SEND","MORE", "MONEY"])
+def modifica_vetor(entrada,posicao, valor):
+    vetor = entrada.copy()
+    if valor not in vetor:
+        vetor[posicao] = valor
+        return vetor
+    else:
+        i = vetor.index(valor)
+        temp = vetor[i]
+        vetor[i] = vetor[posicao]
+        vetor[posicao] = temp
+        return vetor
+def expansao(estado_atual,pos):
+    res = np.zeros([10,len(estado_atual)])
+    for i in range(10):
+        res[i] = modifica_vetor(estado_atual, pos, i)
+    return res
+#print(expansao([0,1, 2, 3,4,5,6,7,8,9], 1))
