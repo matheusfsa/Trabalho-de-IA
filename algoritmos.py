@@ -5,8 +5,6 @@
 
 import numpy as np
 import time
-from search import *
-from utils import *
 
 def criaTabelaRes(vetores):
     j=0
@@ -237,7 +235,7 @@ def qualidade(vetor, tabela):
     return abs(res)
 
 
-def experimento(n_execucoes,n_iteracoes,por_tw,termos):
+def experimento(n_execucoes,n_iteracoes,por_tw,termos,saida):
     res_hill = 0
     acertos_hill = 0
     acertos_sa = 0
@@ -262,7 +260,7 @@ def experimento(n_execucoes,n_iteracoes,por_tw,termos):
     finish = time.time()
     #res_hill /= n_execucoes
     res_sa /= n_execucoes
-    print(it_certas)
+    #print(it_certas)
     if acertos_sa != 0:
          it_certas /= acertos_sa
          tem_certas /= acertos_sa
@@ -272,20 +270,21 @@ def experimento(n_execucoes,n_iteracoes,por_tw,termos):
     por_sa = (float(acertos_sa) / n_execucoes) * 100
     #tempo_hill/=n_execucoes
     tempo_sim/=n_execucoes
-    print("Dados: ")
-    print("Número de execuções: ", n_execucoes)
-    print("Número de iterações: ", n_iteracoes)
-    print("Tempo(em min): ", (finish-start)/60)
-    print("Porcentagem de modificação do tweak:", por_tw*100, "%")
-    print("Termos: ", termos)
-    print("\n                                       Resultado")
-    print("-----------------------------------------------------------------------------------------------------------")
-    print("                     |Iterações  | Acertos(em %)| Iterações em acertos |Tempo(em s)| Tempo em acertos(em s)")
+    arq = open(saida,"a")
+    arq.write("                                         Dados \n")
+    arq.write("Número de execuções: "+ str(n_execucoes)+ "\n")
+    arq.write("Número de iterações: " +  str(n_iteracoes) + "\n")
+    arq.write("Tempo(em min): " +  str((finish-start)/60) + "\n")
+    arq.write("Porcentagem de modificação do tweak:" + str(por_tw*100) + "%\n")
+    arq.write("Termos: "+ str(termos) + "\n")
+    arq.write("\n                                       Resultado\n")
+    arq.write("-----------------------------------------------------------------------------------------------------------\n")
+    arq.write("                     |Iterações  | Acertos(em %)| Iterações em acertos |Tempo(em s)| Tempo em acertos(em s)\n")
     # print("-----------------------------------------------------------------")
     # print("Hill Climbing       | {0}      |    {1:.1f}     ||    {2:.3f}".format(res_hill,por_hill,tempo_hill))
-    print("------------------------------------------------------------------------------------------------------------")
-    print("Simulated Annealing  | {0}      |    {1:.1f}     |       {2:.1f}          |    {3:.3f}  |   {4:.3f}         ".format(res_sa, por_sa, it_certas, tempo_sim, tem_certas))
-    print("------------------------------------------------------------------------------------------------------------")
+    arq.write("------------------------------------------------------------------------------------------------------------\n")
+    arq.write("Simulated Annealing  | {0}      |    {1:.1f}     |       {2:.1f}          |    {3:.3f}  |   {4:.3f}         \n".format(res_sa, por_sa, it_certas, tempo_sim, tem_certas))
+    arq.write("------------------------------------------------------------------------------------------------------------\n\n")
     # print("Média               | {0:.2f}       |    {1:.1f}     |    {2:.3f}".format((res_hill+res_sa)/2, (por_hill+por_sa)/2, (tempo_sim+tempo_hill)/2))
     # print("-----------------------------------------------------------------")
 
@@ -297,9 +296,10 @@ def cria_lista(n):
         res.append(aux[j])
         aux.remove(aux[j])
     return res
-
-experimento(2, 1000000, 0.3, ["FORTY","TEN","TEN","SIXTY"])
-
+experimento(100, 1000000, 0.3, ["AB","CD", "DA"],"resultado.txt")
+experimento(100, 1000000, 0.3, ["SEND","MORE", "MONEY"],"resultado.txt")
+experimento(100, 1000000, 0.3, ["POTATO", "TOMATO", "PUMPKIN"],"resultado.txt")
+experimento(100, 1000000, 0.3, ["FORTY","TEN","TEN","SIXTY"],"resultado.txt")
 #runSimAnnealing(0.3,500000,["FORTY","TEN","TEN","SIXTY"],True)
 #print("Lista: ", cria_lista(8))
 #print(lista_aleatoria(8,criaTabelaRes(["SEND","MORE", "MONEY"])))
