@@ -5,20 +5,25 @@
 
 import numpy as np
 import time
-
+# função que recebe os termos da soma e retorna uma tabela para auxiliar o algoritmo
 def criaTabelaRes(vetores):
     j=0
     tam = len(vetores)
+    # A tabela possui três colunas.
+    # 1ª coluna: posições da letra no vetor solução, se o valor=-1 a letra não pertence a soma.
+    # 2ª coluna: soma do valores posicionais da letra
+    # 3ª coluna: indica se a letra é primeira de algum termo
     tabela = [(-1, 0, 0) for i in range(27)]
-
+    
     for i in range(tam):
         tam_i = len(vetores[i])
         if i != tam-1:
+            # Os primeiros termos da soma
             for j in range(tam_i):
-                pos = ord(vetores[i][j].upper()) - 65
+                # valor da letra
+                valor1= ord(vetores[i][j].upper()) - 65
                 valor1 = pos
                 valor2 = tabela[pos][1] + 10**(tam_i - (j+1))
-                #print("{} {} {}".format(vetores[i][j].upper(), pos, 10**(tam_i - (j+1))))
                 if j == 0:
                     tabela[pos] = (valor1, valor2, 1)
                 else:
@@ -28,7 +33,6 @@ def criaTabelaRes(vetores):
                 pos = ord(vetores[i][j].upper()) - 65
                 valor1 = pos
                 valor2 = tabela[pos][1] - 10 ** (tam_i - (j + 1))
-                #print("{} {} {}".format(vetores[i][j].upper(), pos, 10 ** (tam_i - (j + 1))))
                 if j == 0:
                     tabela[pos] = (valor1, valor2, 1)
                 else:
@@ -44,7 +48,6 @@ def ajustar(possibleValues,tabela):
                 possibleValues[i] = valor
             else:
                 id = get_id(possibleValues, valor)
-                # print(possibleValues[id])
                 temp = possibleValues[id]
                 possibleValues[id] = possibleValues[i]
                 possibleValues[i] = temp
@@ -66,10 +69,6 @@ def get_id(vetor,valor):
 def tweak(valores, tabela,n_alt):
     possibleValues = valores.copy()
     tam = len(valores)
-    #pos = 0
-    #alt = np.random.randint(1, len(valores))
-    #alt = int(round(n_alt*len(valores)))
-    #alt = 2
     for j in range(n_alt):
         pos = np.random.randint(tam)
         valor = np.random.randint(10)
