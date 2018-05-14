@@ -110,25 +110,36 @@ def hillClimbing(max_alt,nTests,tabela):
 
     return valores, soma, n_interacoes
 
-
+# max_alt: a porcentagem de posições que serão alteradas no tweak
+# nTests: número máximo de iterações
+# tabela: a tabela que contém a soma dos valores posicionais de cada letra
 def simulatedAnnealing(max_alt,nTests,tabela):
     nLetras = len(tabela)
 
     # np.arange(n) retorna um vetor com de tamanho n com a sequência de 0 a n-1
+    # A função ajustar, modifica o vetor para que o vetor respeite as restrições
+    # valores é um vetor gerado aleatóriamentes, mas que respeita as restrições
     valores = ajustar(cria_lista(nLetras),tabela)
+    # qualidade é uma função que retorna o valor da solução
+    
     soma = qualidade(valores, tabela)
     T = nTests*100
     c = 0.8
     #print(T)
+    # alt é o numero de posições da solução que serão alteradas
     alt = int(round(max_alt * nLetras))
-    # while T>1:
     n_interacoes = 0
     for i in range(nTests):
+        # Caso de parada: Encontrou  a solução ótima, ou seja soma = 0, ou passou o tempo de execução
+        #o algoritmo não para quando T=0, ele passa a ter o comportamento do hill climbing
+        # soma é o valor da solução atual
         if soma != 0:
             # Choose cities to swap
+            # possibleValues é uma solução gerada  a partir do tweak na solução atual
             possibleValues = ajustar(tweak(valores, tabela, alt), tabela)
             novaSoma = qualidade(possibleValues, tabela)
             if novaSoma != -1:
+                # Se a nova solução for melhor ou se um valor entre 0 e 1 for menor que e^(deltaE/t)
                 if (novaSoma < soma) or (T >= 0 and np.random.rand() < np.exp((soma - novaSoma)/T)):
                     soma = novaSoma
                     valores = possibleValues
