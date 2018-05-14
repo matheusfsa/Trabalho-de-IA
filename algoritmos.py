@@ -117,8 +117,6 @@ def simulatedAnnealing(max_alt,nTests,tabela):
     # np.arange(n) retorna um vetor com de tamanho n com a sequência de 0 a n-1
     valores = ajustar(cria_lista(nLetras),tabela)
     soma = qualidade(valores, tabela)
-    if soma == 0:
-        print("Acertou de primeira!")
     T = nTests*100
     c = 0.8
     #print(T)
